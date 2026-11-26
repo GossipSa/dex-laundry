@@ -1,4 +1,4 @@
-const CACHE='dex-mobile-v15-20261126-rollback';
+const CACHE='dex-mobile-v16-20261126-ach-fold';
 const ROOT=new URL('../',self.location.href);
 const CORE=['mobile/','mobile/index.html','mobile/manifest.webmanifest','mobile/icon-192.png','assets/home.webp','assets/laundry.webp','assets/board.webp','assets/reception.webp','assets/rest.webp','assets/storage.webp','assets/dex-start.png','assets/portrait.jpg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(p=>new URL(p,ROOT).href))).then(()=>self.skipWaiting())));
