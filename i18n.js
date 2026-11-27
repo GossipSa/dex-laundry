@@ -10,14 +10,15 @@ const esc=s=>s.replace(/[.*+?^\${}()|[\]\\]/g,'\\$&');
 const pattern=new RegExp('(^|[^А-Яа-яЁё])('+Object.keys(DEX_EN_DICTIONARY).sort((a,b)=>b.length-a.length).map(esc).join('|')+')(?![А-Яа-яЁё])','g');
 function translate(value){if(lang!=='en'||typeof value!=='string'||!/[А-Яа-яЁё]/.test(value))return value;return value.replace(pattern,(_,prefix,phrase)=>prefix+DEX_EN_DICTIONARY[phrase]);}
 window.dexTranslate=translate;
-window.dexSetLanguage=function(next){if(next!=='ru'&&next!=='en')return;try{localStorage.setItem(key,next)}catch(e){}if(next!==lang){let u=new URL(location.href);u.searchParams.set('lang',next);location.assign(u.href)}else markLanguage()};
+window.dexSetLanguage=function(next){if(next!=='ru'&&next!=='en')return;try{localStorage.setItem(key,next)}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);u.searchParams.set('lv','35');location.replace(u.href)};
+document.addEventListener('click',function(e){const b=e.target.closest?.('[data-dex-language]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();window.dexSetLanguage(b.getAttribute('data-dex-language'))},true);
 function markLanguage(){document.querySelectorAll('[data-dex-language]').forEach(b=>b.setAttribute('aria-pressed',String(b.getAttribute('data-dex-language')===lang)))}
 const excluded='script,style,textarea,[data-dex-no-translate]';
 const attrs=['title','aria-label','alt','placeholder'];
 function ignored(el){return !el||!!el.closest(excluded)}
 function textNode(node){const parent=node.parentElement;if(ignored(parent))return;const old=node.nodeValue,v=translate(old);if(v===old)return;const opt=parent.closest('option');if(opt&&!opt.hasAttribute('value'))opt.setAttribute('value',opt.value);node.nodeValue=v;}
 function attributes(el){if(ignored(el))return;for(const attr of attrs){const old=el.getAttribute(attr);if(old===null)continue;const v=translate(old);if(v!==old)el.setAttribute(attr,v)}}
-function visit(node){if(node.nodeType===3){textNode(node);return}if(node.nodeType!==1||ignored(node))return;attributes(node);node.querySelectorAll('[title],[aria-label],[alt],[placeholder]').forEach(attributes);const tw=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);while(tw.nextNode())textNode(tw.currentNode)}
+function visit(node){if(node.nodeType===3){textNode(node);return}if(node.nodeType!==1)return;if(node.matches?.('[data-dex-language]')||node.querySelector?.('[data-dex-language]'))markLanguage();if(ignored(node))return;attributes(node);node.querySelectorAll('[title],[aria-label],[alt],[placeholder]').forEach(attributes);const tw=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);while(tw.nextNode())textNode(tw.currentNode)}
 markLanguage();
 if(lang==='en'){
 if(typeof window.confirm==='function'){const nativeConfirm=window.confirm.bind(window);window.confirm=message=>nativeConfirm(translate(message))}
