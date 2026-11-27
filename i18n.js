@@ -4,13 +4,13 @@ const DEX_EN_DICTIONARY={"Чистка":"Cleaning","Свободная игра"
 'use strict';
 const key='dex-language-v1';
 let lang='ru';
-try{lang=localStorage.getItem(key)==='en'?'en':'ru'}catch(e){try{lang=new URLSearchParams(location.search).get('lang')==='en'?'en':'ru'}catch(_){}}
+try{lang=localStorage.getItem(key)==='en'?'en':'ru'}catch(e){}try{const requested=new URLSearchParams(location.search).get('lang');if(requested==='ru'||requested==='en'){lang=requested;try{localStorage.setItem(key,lang)}catch(e){}}}catch(e){}
 document.documentElement.lang=lang;
 const esc=s=>s.replace(/[.*+?^\${}()|[\]\\]/g,'\\$&');
 const pattern=new RegExp('(^|[^А-Яа-яЁё])('+Object.keys(DEX_EN_DICTIONARY).sort((a,b)=>b.length-a.length).map(esc).join('|')+')(?![А-Яа-яЁё])','g');
 function translate(value){if(lang!=='en'||typeof value!=='string'||!/[А-Яа-яЁё]/.test(value))return value;return value.replace(pattern,(_,prefix,phrase)=>prefix+DEX_EN_DICTIONARY[phrase]);}
 window.dexTranslate=translate;
-window.dexSetLanguage=function(next){if(next!=='ru'&&next!=='en')return;try{localStorage.setItem(key,next)}catch(e){let u=new URL(location.href);u.searchParams.set('lang',next);location.href=u.href;return}if(next!==lang)location.reload();else markLanguage()};
+window.dexSetLanguage=function(next){if(next!=='ru'&&next!=='en')return;try{localStorage.setItem(key,next)}catch(e){}if(next!==lang){let u=new URL(location.href);u.searchParams.set('lang',next);location.assign(u.href)}else markLanguage()};
 function markLanguage(){document.querySelectorAll('[data-dex-language]').forEach(b=>b.setAttribute('aria-pressed',String(b.getAttribute('data-dex-language')===lang)))}
 const excluded='script,style,textarea,[data-dex-no-translate]';
 const attrs=['title','aria-label','alt','placeholder'];
